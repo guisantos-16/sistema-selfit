@@ -26,10 +26,8 @@ router.post('/auth', validarAutenticacao, async (req, res) => {
     const { usuario, senha } = req.body;
 
     try {
-        // 1. Busca o usuário no banco de dados de forma segura (prevenindo SQL Injection)
         const [rows] = await mysql.query('SELECT * FROM usuarios WHERE usuario = ?', [usuario]);
 
-        // 2. Verifica se o usuário existe
         if (rows.length === 0) {
             return res.status(401).json({
                 sucesso: false,
@@ -39,8 +37,7 @@ router.post('/auth', validarAutenticacao, async (req, res) => {
 
         const user = rows[0];
 
-        // 3. Compara a senha enviada com o hash armazenado no banco usando bcrypt
-        const senhaValida = await bcrypt.compare(senha, user.senha);
+        const senhaValida = await bcrypt.compare(senha, user.senha_hash);
 
         if (!senhaValida) {
             return res.status(401).json({
@@ -49,7 +46,6 @@ router.post('/auth', validarAutenticacao, async (req, res) => {
             });
         }
 
-        // 4. Retorno de sucesso
         return res.status(200).json({
             sucesso: true,
             mensagem: 'Autenticação realizada com sucesso!'
