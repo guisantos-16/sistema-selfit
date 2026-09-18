@@ -22,6 +22,54 @@ const validarAutenticacao = (req, res, next) => {
     next();
 }
 
+/**
+ * @swagger
+ * /register:
+ *   post:
+ *     summary: Cadastra um novo usuário
+ *     description: Recebe usuário e senha, criptografa a senha com bcrypt e salva no banco de dados MySQL.
+ *     tags: [Autenticação]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - usuario
+ *               - senha
+ *             properties:
+ *               usuario:
+ *                 type: string
+ *                 description: Nome de usuário para o cadastro.
+ *                 example: "yvson.jose"
+ *               senha:
+ *                 type: string
+ *                 description: Senha do usuário (será criptografada).
+ *                 example: "senha-ficticia"
+ *     responses:
+ *       201:
+ *         description: Usuário cadastrado com sucesso!
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Usuário cadastrado!"
+ *       500:
+ *         description: Erro interno do servidor (falha ao salvar no banco ou hash).
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Erro interno do servidor."
+ */
+
 router.post('/register', validarAutenticacao, async (req, res) => {
     const { usuario, senha } = req.body;
 
