@@ -22,6 +22,48 @@ const validarAutenticacao = (req, res, next) => {
     next();
 }
 
+/**
+ * @swagger
+ * /auth:
+ *   post:
+ *     summary: Faz autenticação dos usuários.
+ *     description: Recebe os dados do login e valida com os cadastros da base de dados.
+ *     tags: [Autenticação]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - nome
+ *               - senha
+ *             properties:
+ *               nome:
+ *                 type: string
+ *                 description: nome do usuário.
+ *                 example: "vanderson.gabriel"
+ *               senha:
+ *                 type: string
+ *                 description: senha do utilizador
+ *                 example: "admin"
+ *     responses:
+ *       200:
+ *         description: Autenticação realizada com sucesso.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 sucesso:
+ *                   type: boolean
+ *                   example: true
+ *                 mensagem:
+ *                   type: string
+ *                   example: "Usuário autenticado"
+ *       401:
+ *         description: Usuário ou senha inválidos.
+ */
 router.post('/auth', validarAutenticacao, async (req, res) => {
     const { usuario, senha } = req.body;
 

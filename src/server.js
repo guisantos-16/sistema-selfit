@@ -11,17 +11,19 @@ app.use(cors({
 
 app.use(express.json());
 
-const autenticador = require('../src/routes/autenticador-usuarios');
-const cadastro = require('../src/routes/cadastro');
+if (process.env.NODE_ENV !== 'production') {
+    const swaggerUi = require('swagger-ui-express');
+    const swaggerSpec = require('./docs/swaggerConfig');
 
-// Equipamentos
-const painelEquipamentos = require('./routes/equipamentos/painel-principal');
+    app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+    console.log('Documentação disponível em /docs (Ambiente de Desenvolvimento)');
+}
+
+const autenticador = require('./routes/autenticador-usuarios');
+const cadastro = require('./routes/cadastro');
 
 app.use(autenticador);
 app.use(cadastro);
-
-// Equipamentos
-app.use(painelEquipamentos);
 
 app.listen(port, () => {
     console.log(`Aplicação rodando na porta ${port}.`);
