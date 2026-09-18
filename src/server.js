@@ -16,7 +16,7 @@ if (process.env.NODE_ENV !== 'production') {
     const swaggerSpec = require('./docs/swaggerConfig');
 
     app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
-    console.log('Documentação disponível em /docs (Ambiente de Desenvolvimento)');
+    console.log('Documentação disponível em /api-docs (Ambiente de Desenvolvimento)');
 }
 
 const autenticador = require('./routes/autenticador-usuarios');
