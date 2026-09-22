@@ -16,7 +16,7 @@ const options = {
         ],
     },
     // Busca os comentários nas rotas...
-    apis: ['./src/routes/*.js']
+    apis: ['./src/routes/**/*.js']
 };
 
 const swaggerSpec = swaggerJsdoc(options);

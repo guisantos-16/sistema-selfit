@@ -1,6 +1,6 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
-const mysql = require('../config/db');
+const mysql = require('../../config/db');
 const router = express.Router();
 
 const validarAutenticacao = (req, res, next) => {

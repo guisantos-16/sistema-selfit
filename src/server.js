@@ -19,11 +19,15 @@ if (process.env.NODE_ENV !== 'production') {
     console.log('Documentação disponível em /api-docs (Ambiente de Desenvolvimento)');
 }
 
-const autenticador = require('./routes/autenticador-usuarios');
-const cadastro = require('./routes/cadastro');
+const autenticador = require('./routes/autenticação/autenticador-usuarios');
+const cadastro = require('./routes/cadastros/cadastro-usuarios');
+
+const cadastroUnidades = require('./routes/cadastros/cadastro-unidades');
 
 app.use(autenticador);
 app.use(cadastro);
+
+app.use(cadastroUnidades);
 
 app.listen(port, () => {
     console.log(`Aplicação rodando na porta ${port}.`);

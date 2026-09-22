@@ -1,5 +1,5 @@
 const express = require('express');
-const mysql = require('../config/db');
+const mysql = require('../../config/db');
 const bcrypt = require('bcrypt');
 const router = express.Router();
 
@@ -82,6 +82,12 @@ router.post('/register', validarAutenticacao, async (req, res) => {
             message: 'Usuário cadastrado!'
         });
     } catch (error) {
+        if (error.code === 'ER_DUP_ENTRY' || error.errno === 1062) {
+            return res.status(400).json({
+                message: 'Este nome de usuário já está em uso.'
+            });
+        }
+
         console.error("ERRO DETALHADO:", error);
 
         return res.status(500).json({

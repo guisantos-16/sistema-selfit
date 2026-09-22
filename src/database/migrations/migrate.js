@@ -18,10 +18,9 @@ exports.up = async function (knex) {
     // 2. Tabela Usuarios
     await knex.schema.createTable('usuarios', (table) => {
         table.increments('id').primary();
-        table.string('usuario', 100).notNullable();
+        table.string('usuario', 100).unique().notNullable();
         table.string('senha_hash', 255).notNullable();
-        // Feature futura mantida comentada conforme o schema
-        // table.boolean('senha_provisoria').notNullable().defaultTo(true);
+        // Feature futura: senha_provisoria BOOLEAN NOT NULL DEFAULT TRUE
     });
 
     // 3. Tabela Equipamentos
@@ -73,7 +72,7 @@ exports.up = async function (knex) {
  * @returns { Promise<void> }
  */
 exports.down = async function (knex) {
-    // Ordem reversa para exclusão correta respeitando as FKs
+    // Remoção de índices e tabelas em ordem reversa para respeitar as FKs
     await knex.schema.alterTable('manutencoes', (table) => {
         table.dropIndex([], 'idx_manutencoes_status');
     });
