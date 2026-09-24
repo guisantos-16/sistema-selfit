@@ -3,6 +3,9 @@
  * @returns { Promise<void> }
  */
 exports.up = async function (knex) {
+    // Importa o bcrypt para criptografar
+    const bcrypt = require('bcrypt');
+
     // 1. Tabela Unidades
     await knex.schema.createTable('unidades', (table) => {
         table.increments('id').primary();
@@ -15,7 +18,7 @@ exports.up = async function (knex) {
         table.string('numero', 20);
         table.timestamps(true, true);
 
-        // Rigidez: Apenas maiúsculas e sem espaços vazios
+        // Rigidez: Apenas maiúsculas e sem espaços vazios (Requer MySQL 8.0+)
         table.check('nome = UPPER(nome) AND nome = TRIM(nome) AND LENGTH(TRIM(nome)) > 0');
         table.check('cnpj = UPPER(cnpj) AND cnpj = TRIM(cnpj) AND LENGTH(TRIM(cnpj)) > 0');
     });
@@ -29,6 +32,20 @@ exports.up = async function (knex) {
         table.timestamps(true, true);
 
         table.check('usuario = UPPER(usuario) AND usuario = TRIM(usuario) AND LENGTH(TRIM(usuario)) > 0');
+    });
+
+    // Criação de usuário padrão!
+    const usuarioPadrao = 'VANDERSON.GABRIEL';
+    const senhaPlana = 'Selfit@2026'; // <--- Digite a senha que você quiser aqui!
+    
+    // O bcrypt gera o hash seguro na hora que a migration roda
+    const saltRounds = 10;
+    const senhaHashGerada = await bcrypt.hash(senhaPlana, saltRounds);
+
+    await knex('usuarios').insert({
+        usuario: usuarioPadrao,
+        senha_hash: senhaHashGerada,
+        senha_provisoria: false
     });
 
     // 3. Tabela Equipamentos
@@ -67,13 +84,14 @@ exports.up = async function (knex) {
         table.check('status = UPPER(status) AND status = TRIM(status) AND LENGTH(TRIM(status)) > 0');
     });
 
-    // 4. Índices Parciais para Equipamentos Ativos (Performance para Soft Delete)
-    // O banco indexará apenas os registros onde deleted_at é NULL, mantendo as buscas rápidas
-    await knex.raw(`CREATE INDEX idx_equip_nome ON equipamentos (nome_identificacao) WHERE deleted_at IS NULL;`);
-    await knex.raw(`CREATE INDEX idx_equip_serie ON equipamentos (numero_serie) WHERE deleted_at IS NULL;`);
-    await knex.raw(`CREATE INDEX idx_equip_patrimonio ON equipamentos (placa_patrimonio) WHERE deleted_at IS NULL;`);
-    await knex.raw(`CREATE INDEX idx_equip_categoria ON equipamentos (categoria) WHERE deleted_at IS NULL;`);
-    await knex.raw(`CREATE INDEX idx_equip_garantia_cat ON equipamentos (categoria, data_garantia) WHERE deleted_at IS NULL;`);
+    // 4. Índices Compostos (Alternativa otimizada para MySQL lidar com Soft Delete)
+    await knex.schema.alterTable('equipamentos', (table) => {
+        table.index(['deleted_at', 'nome_identificacao'], 'idx_equip_nome_ativo');
+        table.index(['deleted_at', 'numero_serie'], 'idx_equip_serie_ativo');
+        table.index(['deleted_at', 'placa_patrimonio'], 'idx_patrimonio_ativo');
+        table.index(['deleted_at', 'categoria'], 'idx_equip_cat_ativo');
+        table.index(['deleted_at', 'categoria', 'data_garantia'], 'idx_equip_garantia_cat');
+    });
 
     // 5. Tabela Manutenções
     await knex.schema.createTable('manutencoes', (table) => {

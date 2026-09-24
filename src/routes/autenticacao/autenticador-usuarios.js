@@ -3,6 +3,8 @@ const bcrypt = require('bcrypt');
 const mysql = require('../../config/db');
 const router = express.Router();
 
+const jwt = require('jsonwebtoken');
+
 const validarAutenticacao = (req, res, next) => {
     const { usuario, senha } = req.body;
 
@@ -93,16 +95,25 @@ router.post('/auth', validarAutenticacao, async (req, res) => {
             });
         }
 
+        // ... dentro da sua rota de login, após validar que a senha bateu:
+        const token = jwt.sign(
+            { id: user.id, usuario: user.usuario },
+            process.env.JWT_SECRET,
+            { expiresIn: '8h' } // O token expira em 8 horas
+        );
+
         return res.status(200).json({
             sucesso: true,
-            mensagem: 'Autenticação realizada com sucesso!'
+            mensagem: 'Autenticação realizada com sucesso!',
+            token: token
         });
 
     } catch (error) {
         console.error('Erro no processo de autenticação:', error);
         return res.status(500).json({
             sucesso: false,
-            mensagem: 'Erro interno no servidor.'
+            mensagem: 'Erro interno no servidor.',
+            erro: error.message
         });
     }
 });
