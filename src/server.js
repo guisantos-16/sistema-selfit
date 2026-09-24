@@ -29,8 +29,8 @@ const consultaEquipamentos = require('./routes/consultas/consulta-equipamentos')
 const consultaGarantias = require('./routes/consultas/consulta-garantias');
 const consultaManutencoes = require('./routes/consultas/consulta-manutencoes');
 
-const atualizacaoEquipamentos = require('./routes/atualizacao/atualizacao-equipamentos');
-const exclusaoEquipamentos = require('./routes/exclusao/exclusao-equipamentos');
+const atualizacaoEquipamentos = require('./routes/atualizacao e exclusao/atualizacao-equipamento');
+const exclusaoEquipamentos = require('./routes/atualizacao e exclusao/exclusao-equipamento');
 
 app.use(autenticador);
 
