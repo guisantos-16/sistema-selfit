@@ -9,16 +9,21 @@ const validarAutenticacao = (req, res, next) => {
     if (!usuario || typeof usuario !== 'string' || usuario.trim() === '') {
         return res.status(400).json({
             sucesso: false,
-            mensagem: 'O campo "usuario" é obrigatório e deve ser uma string válida.'
+            message: 'O campo "usuario" é obrigatório e deve ser uma string válida.'
         });
     }
 
     if (!senha || typeof senha !== 'string' || senha.trim() === '') {
         return res.status(400).json({
             sucesso: false,
-            mensagem: 'O campo "senha" é obrigatório e deve ser uma string válida.'
+            message: 'O campo "senha" é obrigatório e deve ser uma string válida.'
         });
     }
+
+    // Sanitização e reatribuição limpa (maiúsculas para o usuário)
+    req.body.usuario = usuario.trim().toUpperCase();
+    req.body.senha = senha.trim();
+
     next();
 }
 
@@ -27,8 +32,8 @@ const validarAutenticacao = (req, res, next) => {
  * /register:
  *   post:
  *     summary: Cadastra um novo usuário
- *     description: Recebe usuário e senha, criptografa a senha com bcrypt e salva no banco de dados MySQL.
- *     tags: [Autenticação]
+ *     description: Recebe usuário e senha, padroniza em maiúsculas, criptografa a senha com bcrypt e salva no banco de dados MySQL.
+ *     tags: [Cadastros]
  *     requestBody:
  *       required: true
  *       content:
@@ -41,8 +46,8 @@ const validarAutenticacao = (req, res, next) => {
  *             properties:
  *               usuario:
  *                 type: string
- *                 description: Nome de usuário para o cadastro.
- *                 example: "yvson.jose"
+ *                 description: Nome de usuário para o cadastro (será convertido para maiúsculas).
+ *                 example: "YVSON.JOSE"
  *               senha:
  *                 type: string
  *                 description: Senha do usuário (será criptografada).
@@ -55,16 +60,35 @@ const validarAutenticacao = (req, res, next) => {
  *             schema:
  *               type: object
  *               properties:
+ *                 sucesso:
+ *                   type: boolean
+ *                   example: true
  *                 message:
  *                   type: string
- *                   example: "Usuário cadastrado!"
- *       500:
- *         description: Erro interno do servidor (falha ao salvar no banco ou hash).
+ *                   example: "Usuário cadastrado com sucesso!"
+ *       400:
+ *         description: Erro de validação ou usuário já existente.
  *         content:
  *           application/json:
  *             schema:
  *               type: object
  *               properties:
+ *                 sucesso:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Este nome de usuário já está em uso."
+ *       500:
+ *         description: Erro interno do servidor.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 sucesso:
+ *                   type: boolean
+ *                   example: false
  *                 message:
  *                   type: string
  *                   example: "Erro interno do servidor."
@@ -76,14 +100,16 @@ router.post('/register', validarAutenticacao, async (req, res) => {
     try {
         const senhaHash = await bcrypt.hash(senha, 10);
 
-        const [rows] = await mysql.query('INSERT INTO usuarios (usuario, senha_hash) VALUES (?, ?)', [usuario, senhaHash]);
+        await mysql.query('INSERT INTO usuarios (usuario, senha_hash) VALUES (?, ?)', [usuario, senhaHash]);
 
         return res.status(201).json({
-            message: 'Usuário cadastrado!'
+            sucesso: true,
+            message: 'Usuário cadastrado com sucesso!'
         });
     } catch (error) {
         if (error.code === 'ER_DUP_ENTRY' || error.errno === 1062) {
             return res.status(400).json({
+                sucesso: false,
                 message: 'Este nome de usuário já está em uso.'
             });
         }
@@ -91,6 +117,7 @@ router.post('/register', validarAutenticacao, async (req, res) => {
         console.error("ERRO DETALHADO:", error);
 
         return res.status(500).json({
+            sucesso: false,
             message: 'Erro interno do servidor.'
         });
     }

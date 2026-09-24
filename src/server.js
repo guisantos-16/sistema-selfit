@@ -19,15 +19,31 @@ if (process.env.NODE_ENV !== 'production') {
     console.log('Documentação disponível em /api-docs (Ambiente de Desenvolvimento)');
 }
 
-const autenticador = require('./routes/autenticação/autenticador-usuarios');
-const cadastro = require('./routes/cadastros/cadastro-usuarios');
+const autenticador = require('./routes/autenticacao/autenticador-usuarios');
 
+const cadastroUsuarios = require('./routes/cadastros/cadastro-usuarios');
 const cadastroUnidades = require('./routes/cadastros/cadastro-unidades');
+const cadastroEquipamentos = require('./routes/cadastros/cadastro-equipamentos');
+
+const consultaEquipamentos = require('./routes/consultas/consulta-equipamentos');
+const consultaGarantias = require('./routes/consultas/consulta-garantias');
+const consultaManutencoes = require('./routes/consultas/consulta-manutencoes');
+
+const atualizacaoEquipamentos = require('./routes/atualizacao/atualizacao-equipamentos');
+const exclusaoEquipamentos = require('./routes/exclusao/exclusao-equipamentos');
 
 app.use(autenticador);
-app.use(cadastro);
 
+app.use(cadastroUsuarios);
 app.use(cadastroUnidades);
+app.use(cadastroEquipamentos);
+
+app.use(consultaEquipamentos);
+app.use(consultaGarantias);
+app.use(consultaManutencoes);
+
+app.use(atualizacaoEquipamentos);
+app.use(exclusaoEquipamentos);
 
 app.listen(port, () => {
     console.log(`Aplicação rodando na porta ${port}.`);

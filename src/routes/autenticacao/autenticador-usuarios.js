@@ -19,6 +19,11 @@ const validarAutenticacao = (req, res, next) => {
             mensagem: 'O campo "senha" é obrigatório e deve ser uma string válida.'
         });
     }
+
+    // Sanitização: Padroniza o usuário em maiúsculas e sem espaços extras
+    req.body.usuario = usuario.trim().toUpperCase();
+    req.body.senha = senha.trim();
+
     next();
 }
 
@@ -36,16 +41,16 @@ const validarAutenticacao = (req, res, next) => {
  *           schema:
  *             type: object
  *             required:
- *               - nome
+ *               - usuario
  *               - senha
  *             properties:
- *               nome:
+ *               usuario:
  *                 type: string
- *                 description: nome do usuário.
- *                 example: "vanderson.gabriel"
+ *                 description: Nome do usuário.
+ *                 example: "VANDERSON.GABRIEL"
  *               senha:
  *                 type: string
- *                 description: senha do utilizador
+ *                 description: Senha do utilizador
  *                 example: "admin"
  *     responses:
  *       200:
@@ -60,7 +65,7 @@ const validarAutenticacao = (req, res, next) => {
  *                   example: true
  *                 mensagem:
  *                   type: string
- *                   example: "Usuário autenticado"
+ *                   example: "Autenticação realizada com sucesso!"
  *       401:
  *         description: Usuário ou senha inválidos.
  */

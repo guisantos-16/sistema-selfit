@@ -76,7 +76,7 @@ const validarUnidade = (req, res, next) => {
  *   post:
  *     summary: Cadastra uma nova unidade
  *     description: Recebe os dados da unidade, valida tipos estritos, remove espaços nas pontas, converte textos para maiúsculas e salva no banco de dados MySQL.
- *     tags: [Unidades]
+ *     tags: [Cadastros]
  *     requestBody:
  *       required: true
  *       content:
