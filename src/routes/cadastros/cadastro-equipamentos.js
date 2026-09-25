@@ -3,19 +3,19 @@ const mysql = require('../../config/db');
 const router = express.Router();
 
 const validarEquipamento = (req, res, next) => {
-    let { 
-        unidade_nome, 
-        nome_identificacao, 
-        categoria, 
-        marca, 
-        modelo, 
-        numero_serie, 
-        placa_patrimonio, 
-        localizacao, 
-        status, 
-        data_garantia, 
-        endereco_ip, 
-        mac_address 
+    let {
+        unidade_nome,
+        nome_identificacao,
+        categoria,
+        marca,
+        modelo,
+        numero_serie,
+        placa_patrimonio,
+        localizacao,
+        status,
+        data_garantia,
+        endereco_ip,
+        mac_address
     } = req.body;
 
     // 1. unidade_nome: string válida obrigatória
@@ -123,7 +123,7 @@ const validarEquipamento = (req, res, next) => {
     req.body.numero_serie = numero_serie.trim().toUpperCase();
     req.body.placa_patrimonio = placa_patrimonio.trim().toUpperCase();
     req.body.localizacao = localizacao.trim().toUpperCase();
-    
+
     if (status) {
         req.body.status = status.trim().toUpperCase();
     }
@@ -253,19 +253,19 @@ const validarEquipamento = (req, res, next) => {
  */
 
 router.post('/register/equipamentos', validarEquipamento, async (req, res) => {
-    const { 
-        unidade_nome, 
-        nome_identificacao, 
-        categoria, 
-        marca, 
-        modelo, 
-        numero_serie, 
-        placa_patrimonio, 
-        localizacao, 
-        status, 
-        data_garantia, 
-        endereco_ip, 
-        mac_address 
+    const {
+        unidade_nome,
+        nome_identificacao,
+        categoria,
+        marca,
+        modelo,
+        numero_serie,
+        placa_patrimonio,
+        localizacao,
+        status,
+        data_garantia,
+        endereco_ip,
+        mac_address
     } = req.body;
 
     try {
@@ -290,17 +290,17 @@ router.post('/register/equipamentos', validarEquipamento, async (req, res) => {
             (unidade_id, nome_identificacao, categoria, marca, modelo, numero_serie, placa_patrimonio, localizacao, status, data_garantia, endereco_ip, mac_address) 
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             [
-                unidade_id, 
-                nome_identificacao, 
-                categoria, 
-                marca, 
-                modelo, 
-                numero_serie, 
-                placa_patrimonio, 
-                localizacao, 
-                status || 'ATIVO', 
-                data_garantia, 
-                endereco_ip || null, 
+                unidade_id,
+                nome_identificacao,
+                categoria,
+                marca,
+                modelo,
+                numero_serie,
+                placa_patrimonio,
+                localizacao,
+                status || 'ATIVO',
+                data_garantia,
+                endereco_ip || null,
                 mac_address || null
             ]
         );

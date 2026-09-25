@@ -13,19 +13,23 @@ const validarUnidade = (req, res, next) => {
         });
     }
 
-    // 2. CNPJ: estritamente número (sem letras)
-    if (cnpj === undefined || cnpj === null || typeof cnpj !== 'number') {
+    // 2. CNPJ: tratado como string, removendo caracteres não numéricos
+    const cnpjStr = String(cnpj || '').trim();
+    const cnpjLimpo = cnpjStr.replace(/\D/g, '');
+    if (!cnpjLimpo || cnpjLimpo.length !== 14) {
         return res.status(400).json({
             sucesso: false,
-            mensagem: 'O campo "cnpj" é obrigatório e deve ser um número válido (sem letras ou espaços).'
+            mensagem: 'O campo "cnpj" é obrigatório e deve conter exatamente 14 dígitos numéricos.'
         });
     }
 
-    // 3. CEP: estritamente número
-    if (cep === undefined || cep === null || typeof cep !== 'number') {
+    // 3. CEP: tratado como string, preservando zeros à esquerda e removendo traços/pontos
+    const cepStr = String(cep || '').trim();
+    const cepLimpo = cepStr.replace(/\D/g, '');
+    if (cepLimpo.length !== 8) {
         return res.status(400).json({
             sucesso: false,
-            mensagem: 'O campo "cep" é obrigatório e deve ser um número válido.'
+            mensagem: 'O campo "cep" é obrigatório e deve conter exatamente 8 dígitos.'
         });
     }
 
@@ -53,19 +57,23 @@ const validarUnidade = (req, res, next) => {
         });
     }
 
-    // 7. Número: estritamente número
-    if (numero === undefined || numero === null || typeof numero !== 'number') {
+    // 7. Número: tratado como string (aceita números, letras e "S/N")
+    const numeroStr = String(numero || '').trim();
+    if (!numeroStr) {
         return res.status(400).json({
             sucesso: false,
-            mensagem: 'O campo "numero" é obrigatório e deve ser um número válido.'
+            mensagem: 'O campo "numero" é obrigatório e deve ser uma string válida.'
         });
     }
 
-    // Sanitização e reatribuição limpa (sem espaços nas pontas e em maiúsculo para strings)
+    // Sanitização e reatribuição limpa (tudo em string, pontas limpas e texto em maiúsculo)
     req.body.nome = nome.trim().toUpperCase();
+    req.body.cnpj = cnpjLimpo;
+    req.body.cep = cepLimpo;
     req.body.uf = uf.trim().toUpperCase();
     req.body.bairro = bairro.trim().toUpperCase();
     req.body.rua = rua.trim().toUpperCase();
+    req.body.numero = numeroStr.toUpperCase();
 
     next();
 };
@@ -75,7 +83,7 @@ const validarUnidade = (req, res, next) => {
  * /register/unidades:
  *   post:
  *     summary: Cadastra uma nova unidade
- *     description: Recebe os dados da unidade, valida tipos estritos, remove espaços nas pontas, converte textos para maiúsculas e salva no banco de dados MySQL.
+ *     description: Recebe os dados da unidade como string, limpa espaços nas pontas, padroniza textos para maiúsculas e salva no MySQL.
  *     tags: [Cadastros]
  *     requestBody:
  *       required: true
@@ -94,32 +102,32 @@ const validarUnidade = (req, res, next) => {
  *             properties:
  *               nome:
  *                 type: string
- *                 description: Nome da unidade (será convertido para maiúsculas).
+ *                 description: Nome da unidade (convertido para maiúsculas).
  *                 example: "BOA VIAGEM II"
  *               cnpj:
- *                 type: integer
- *                 description: CNPJ da unidade (estritamente numérico, sem letras ou pontuação).
- *                 example: 12345678000195
+ *                 type: string
+ *                 description: CNPJ da unidade (apenas números, sem pontuação).
+ *                 example: "12345678000195"
  *               cep:
- *                 type: integer
- *                 description: CEP da unidade (estritamente numérico).
- *                 example: 51020280
+ *                 type: string
+ *                 description: CEP da unidade (apenas números, preservando zeros à esquerda).
+ *                 example: "05020280"
  *               uf:
  *                 type: string
- *                 description: Sigla do estado com exatamente 2 caracteres (convertida para maiúsculas).
+ *                 description: Sigla do estado com exatamente 2 caracteres.
  *                 example: "PE"
  *               bairro:
  *                 type: string
- *                 description: Nome do bairro (será convertido para maiúsculas).
+ *                 description: Nome do bairro (convertido para maiúsculas).
  *                 example: "BOA VIAGEM"
  *               rua:
  *                 type: string
- *                 description: Nome da rua ou avenida (será convertido para maiúsculas).
+ *                 description: Nome da rua ou avenida (convertido para maiúsculas).
  *                 example: "RUA BRUNO VELOSO"
  *               numero:
- *                 type: integer
- *                 description: Número do endereço (estritamente numérico).
- *                 example: 1000
+ *                 type: string
+ *                 description: Número do endereço (pode conter números ou complementos como S/N).
+ *                 example: "1000"
  *     responses:
  *       201:
  *         description: Unidade cadastrada com sucesso!
@@ -135,7 +143,7 @@ const validarUnidade = (req, res, next) => {
  *                   type: string
  *                   example: "Unidade cadastrada com sucesso!"
  *       400:
- *         description: Erro de validação ou registro duplicado (CNPJ ou nome já existentes).
+ *         description: Erro de validação ou registro duplicado.
  *         content:
  *           application/json:
  *             schema:
@@ -146,7 +154,7 @@ const validarUnidade = (req, res, next) => {
  *                   example: false
  *                 message:
  *                   type: string
- *                   example: "Já existe uma unidade cadastrada com este CNPJ."
+ *                   example: "O campo 'cnpj' é obrigatório e deve conter exatamente 14 dígitos numéricos."
  *       500:
  *         description: Erro interno do servidor.
  *         content:
